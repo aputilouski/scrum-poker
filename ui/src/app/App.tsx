@@ -1,18 +1,36 @@
-import '../theme';
+import { theme } from '../theme';
+import { MantineProvider } from '@mantine/core';
+import { GameManager } from './GameManager';
+import Layout from '../components/Layout';
+import EnterName from '../screens/1EnterName';
+import ChooseGame from '../screens/2ChooseGame';
+import Game from '../screens/3Game';
+// import { io } from 'socket.io-client';
 
-function App() {
+// const socket = io('http://localhost:9000', { transports: ['websocket'] });
+
+// socket.emit('test', { name: 'Nest' }, (response: string) => console.log(typeof response, response));
+
+const App = () => {
+  const getStep = (step: number) => {
+    switch (step) {
+      case 1:
+        return <ChooseGame />;
+      case 2:
+        return <Game />;
+      case 0:
+      default:
+        return <EnterName />;
+    }
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a className="App-link" href="https://reactjs.org" target="_blank" rel="noopener noreferrer">
-          Learn React
-        </a>
-      </header>
-    </div>
+    <MantineProvider withNormalizeCSS theme={theme}>
+      <Layout>
+        <GameManager>{getStep}</GameManager>
+      </Layout>
+    </MantineProvider>
   );
-}
+};
 
 export default App;
