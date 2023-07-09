@@ -1,3 +1,4 @@
+import React from 'react';
 import { TextInput, Button } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useGame } from 'app/GameManager';
@@ -5,17 +6,21 @@ import { useGame } from 'app/GameManager';
 const ChooseGame = () => {
   const form = useForm({
     initialValues: { id: '' },
-    // validate: { name: n => (/^.{2,32}$/.test(n) ? null : 'Invalid name') },
+    validate: { id: n => (/^.{8,}$/.test(n) ? null : 'Invalid game id') },
   });
 
-  const { setGame } = useGame();
+  const { startGame } = useGame();
+
+  React.useEffect(() => {
+    const game_id = window.location.href.split('/game/')[1];
+    if (game_id) startGame(game_id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="mx-auto max-w-sm h-full flex items-center">
       <div className="grow">
-        <form
-        // onSubmit={form.onSubmit(({ name }) => setName(name))}
-        >
+        <form onSubmit={form.onSubmit(({ id }) => startGame(id))}>
           <TextInput //
             autoFocus
             withAsterisk
@@ -31,7 +36,7 @@ const ChooseGame = () => {
 
         <Button //
           className="block w-full mt-5"
-          onClick={() => setGame('')}
+          onClick={() => startGame()}
           size="lg">
           Create my game
         </Button>

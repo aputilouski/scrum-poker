@@ -1,5 +1,3 @@
-/// <reference types="react-scripts" />
-
 type Player = { id: string; name: string };
 
 type Game = {
@@ -12,4 +10,5 @@ type Game = {
   cards: {
     [k: string]: number;
   };
+  timer_id?: NodeJS.Timeout;
 };

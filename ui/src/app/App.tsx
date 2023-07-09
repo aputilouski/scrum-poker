@@ -5,11 +5,8 @@ import Layout from '../components/Layout';
 import EnterName from '../screens/1EnterName';
 import ChooseGame from '../screens/2ChooseGame';
 import Game from '../screens/3Game';
-// import { io } from 'socket.io-client';
-
-// const socket = io('http://localhost:9000', { transports: ['websocket'] });
-
-// socket.emit('test', { name: 'Nest' }, (response: string) => console.log(typeof response, response));
+import { Notifications } from '@mantine/notifications';
+import { ConnectionProvider } from './ConnectionProvider';
 
 const App = () => {
   const getStep = (step: number) => {
@@ -26,8 +23,11 @@ const App = () => {
 
   return (
     <MantineProvider withNormalizeCSS theme={theme}>
+      <Notifications />
       <Layout>
-        <GameManager>{getStep}</GameManager>
+        <ConnectionProvider>
+          <GameManager>{getStep}</GameManager>
+        </ConnectionProvider>
       </Layout>
     </MantineProvider>
   );
