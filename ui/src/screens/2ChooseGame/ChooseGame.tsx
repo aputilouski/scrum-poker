@@ -1,6 +1,6 @@
 import { TextInput, Button } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useGame } from '../app/GameManager';
+import { useGame } from 'app/GameManager';
 
 const ChooseGame = () => {
   const form = useForm({

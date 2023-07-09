@@ -1,11 +1,11 @@
 import { TextInput, Button } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useGame } from '../app/GameManager';
+import { useGame } from 'app/GameManager';
 
 const EnterName = () => {
   const form = useForm({
     initialValues: { name: '' },
-    validate: { name: n => (/^.{2,32}$/.test(n) ? null : 'Invalid name') },
+    validate: { name: n => (/^.{2,12}$/.test(n) ? null : 'Invalid name (2 to 12 characters allowed)') },
   });
 
   const { setName } = useGame();
