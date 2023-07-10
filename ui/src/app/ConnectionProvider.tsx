@@ -4,7 +4,9 @@ import { notifications } from '@mantine/notifications';
 
 const connect = () =>
   new Promise<Socket>((resolve, reject) => {
-    const socket = io('http://localhost:9000', { transports: ['websocket'] });
+    const socket = io(process.env.NODE_ENV === 'development' ? 'http://localhost:9000' : '/', {
+      transports: ['websocket'],
+    });
 
     socket.on('connect', () => {
       notifications.hide('connection-error');

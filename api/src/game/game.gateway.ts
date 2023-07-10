@@ -51,7 +51,7 @@ export class GameGateway {
     if (!id) game = this.gameService.create(client.player);
     else {
       this.gameService.addPlayer(id, client.player);
-      this.server.to(game.id).emit('game:new-player', client.player);
+      this.server.to(id).emit('game:new-player', client.player);
     }
     client.join(game.id);
     return game;
