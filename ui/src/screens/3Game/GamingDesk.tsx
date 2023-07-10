@@ -21,8 +21,8 @@ const PlayersBar: React.FC<PlayersBarProps> = ({ position, className, players: k
   <div className={clsx('flex justify-center', positionClassNames[position], className)}>
     {keys.map(key => (
       <div key={key} className="flex flex-col items-center gap-3 w-12">
-        {game.status !== 'ended' ? (
-          <div className={clsx('w-9 h-14 rounded', game.cards[key] ? 'bg-blue-500' : 'bg-gray-200')} />
+        {game.status !== 'ended' || !game.cards[key] ? (
+          <div className={clsx('w-9 h-14 rounded transition', game.cards[key] ? 'bg-blue-500' : 'bg-gray-200')} />
         ) : (
           <div className="border-2 border-blue-500 border-solid w-9 h-14 flex justify-center items-center rounded">
             <span className="font-bold text-blue-500 text-lg">{game.cards[key]}</span>
@@ -58,8 +58,8 @@ const GamingDesk = () => {
     if (!game?.status) return;
     if (game.status === 'in-progress') setTiming(3);
     else if (game.status === 'expiring') {
-      const timer1 = setTimeout(() => setTiming(t => t - 1), 1000);
-      const timer2 = setTimeout(() => setTiming(t => t - 1), 2000);
+      const timer1 = setTimeout(() => setTiming(t => t - 1), 600);
+      const timer2 = setTimeout(() => setTiming(t => t - 1), 1200);
       return () => {
         clearTimeout(timer1);
         clearTimeout(timer2);
@@ -105,11 +105,14 @@ const GamingDesk = () => {
                   <span className="text-lg">Pick your cards!</span>
                 ))}
               {game.status === 'expiring' && <div className="font-bold text-5xl">{timing}</div>}
-              {game.status === 'ended' && isCaptain && (
-                <Button onClick={() => processGame()} size="lg" color="dark">
-                  Play again
-                </Button>
-              )}
+              {game.status === 'ended' &&
+                (isCaptain ? (
+                  <Button onClick={() => processGame()} size="lg" color="dark">
+                    Play again
+                  </Button>
+                ) : (
+                  <span className="text-lg">Waiting for a new game</span>
+                ))}
             </div>
 
             {/* players at the bottom */}

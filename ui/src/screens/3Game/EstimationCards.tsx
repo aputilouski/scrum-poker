@@ -4,18 +4,14 @@ import { useGame } from 'app/GameManager';
 
 const estimations = [0.5, 1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24];
 const EstimationCards = () => {
-  const { player, game, chooseCard } = useGame();
+  const { player, game, chooseCard, result } = useGame();
   if (!game || !player) return null;
-
-  const selectedEstimation = game.cards[player.id];
+  if (game.status === 'ended' && result) return null;
 
   const onClick = (e: React.MouseEvent) => {
     if (!(e.target instanceof Element)) return;
     const button = e.target.closest('button');
-    if (button) {
-      const newEstimation = parseFloat(button.innerText);
-      if (selectedEstimation !== newEstimation) chooseCard(newEstimation);
-    }
+    if (button) chooseCard(parseFloat(button.innerText));
   };
 
   return (

@@ -47,24 +47,35 @@ export class GameGateway {
     return game;
   }
 
+  @SubscribeMessage('game:quit')
+  quitGame(@ConnectedSocket() client: PlayerSocket, @MessageBody() game_id: string) {
+    this.gameService.removePlayer(game_id, client.player.id);
+    this.server.to(game_id).emit('game:remove-player', client.player.id);
+    client.leave(game_id);
+  }
+
   @SubscribeMessage('game:choose-card')
   chooseCard(@ConnectedSocket() client: PlayerSocket, @MessageBody() [game_id, value]: [string, number]) {
     const player_id = client.player.id;
-    this.gameService.chooseCard(game_id, player_id, value);
-    this.server.to(game_id).emit('game:card-chosen', { game_id, player_id: player_id, value });
+    const cardValue = this.gameService.chooseCard(game_id, player_id, value);
+    this.server.to(game_id).emit('game:card-chosen', { game_id, player_id: player_id, value: cardValue });
   }
 
   @SubscribeMessage('game:process')
   processGame(@MessageBody() game_id: string) {
     const game = this.gameService.getById(game_id);
     if (game.status === 'in-progress') {
-      this.gameService.changeGameStatus(game, 'expiring');
+      this.gameService.changeStatus(game, 'expiring');
       game.timer_id = setTimeout(() => {
-        this.gameService.changeGameStatus(game, 'ended');
-        this.server.to(game_id).emit('game:status-change', game.status);
-      }, 3000);
+        this.gameService.changeStatus(game, 'ended');
+        const estimates = Object.values(game.cards);
+        const stats = estimates.reduce((count, item) => ((count[item] = count[item] + 1 || 1), count), {});
+        const average = estimates.reduce((a, b) => a + b, 0) / estimates.length;
+        this.gameService.dropCards(game);
+        this.server.to(game_id).emit('game:status-change', game.status, { stats, average: average.toFixed(2) });
+      }, 1800);
     } else if (game.status === 'ended') {
-      this.gameService.changeGameStatus(game, 'in-progress');
+      this.gameService.changeStatus(game, 'in-progress');
       clearTimeout(game.timer_id);
       game.timer_id = undefined;
     }

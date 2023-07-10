@@ -26,29 +26,26 @@ export class GameService {
     return game;
   }
 
-  chooseCard(game_id: string, player_id: string, value: number) {
+  chooseCard(game_id: string, player_id: string, value: number): number | undefined {
     const game: Game = games.get(game_id);
     if (!game) throw new WsException('Game not found');
-    game.cards[player_id] = value;
+    if (game.cards[player_id] === value) delete game.cards[player_id];
+    else game.cards[player_id] = value;
+    return game.cards[player_id];
   }
 
-  changeGameStatus(game: Game, status: Game['status']) {
+  changeStatus(game: Game, status: Game['status']) {
     game.status = status;
   }
 
-  // findAll() {
-  //   return `This action returns all game`;
-  // }
+  dropCards(game: Game) {
+    game.cards = {};
+  }
 
-  // findOne(id: number) {
-  //   return `This action returns a #${id} game`;
-  // }
-
-  // update(id: number, updateGameDto: UpdateGameDto) {
-  //   return `This action updates a #${id} game`;
-  // }
-
-  // remove(id: number) {
-  //   return `This action removes a #${id} game`;
-  // }
+  removePlayer(game_id: string, player_id: string) {
+    const game: Game = games.get(game_id);
+    if (!game) throw new WsException('Game not found');
+    delete game.players[player_id];
+    delete game.cards[player_id];
+  }
 }
