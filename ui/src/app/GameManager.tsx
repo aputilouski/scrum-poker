@@ -137,8 +137,6 @@ export const GameManager: React.FC<GameManagerProps> = ({ children }) => {
     },
   };
 
-  console.log(value);
-
   // steps: 1 - enter name; 2 - join/create game; 3 - poker
   return <GameContext.Provider value={value}>{children(state.step)}</GameContext.Provider>;
 };

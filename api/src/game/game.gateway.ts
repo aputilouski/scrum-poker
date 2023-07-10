@@ -8,6 +8,7 @@ import {
 import { GameService } from './game.service';
 import { customAlphabet } from 'nanoid';
 import { Server, Socket } from 'socket.io';
+import { Cron } from '@nestjs/schedule';
 
 type PlayerSocket = { player: Player } & Socket;
 
@@ -17,6 +18,16 @@ export class GameGateway {
 
   @WebSocketServer()
   server: Server;
+
+  @Cron('* */10 * * * *')
+  async handleCron() {
+    const keys = this.gameService.getAll();
+
+    for (const game_id of keys) {
+      const sockets = await this.server.in(game_id).fetchSockets();
+      if (sockets.length === 0) this.gameService.deleteById(game_id);
+    }
+  }
 
   @SubscribeMessage('player:create')
   createPlayer(@ConnectedSocket() client: PlayerSocket, @MessageBody() name: string) {
@@ -39,8 +50,7 @@ export class GameGateway {
     let game: Game | undefined;
     if (!id) game = this.gameService.create(client.player);
     else {
-      game = this.gameService.getById(id);
-      game.players[client.player.id] = client.player.name;
+      this.gameService.addPlayer(id, client.player);
       this.server.to(game.id).emit('game:new-player', client.player);
     }
     client.join(game.id);

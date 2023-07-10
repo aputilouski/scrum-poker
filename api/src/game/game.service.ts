@@ -26,6 +26,14 @@ export class GameService {
     return game;
   }
 
+  getAll() {
+    return games.keys();
+  }
+
+  deleteById(id: string) {
+    return games.delete(id);
+  }
+
   chooseCard(game_id: string, player_id: string, value: number): number | undefined {
     const game: Game = games.get(game_id);
     if (!game) throw new WsException('Game not found');
@@ -40,6 +48,13 @@ export class GameService {
 
   dropCards(game: Game) {
     game.cards = {};
+  }
+
+  addPlayer(game_id: string, player: Player) {
+    const game: Game = games.get(game_id);
+    if (!game) throw new WsException('Game not found');
+    if (Object.keys(game.players).length > 24) throw new WsException('Too many players');
+    game.players[player.id] = player.name;
   }
 
   removePlayer(game_id: string, player_id: string) {
