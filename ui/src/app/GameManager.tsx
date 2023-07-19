@@ -68,7 +68,7 @@ const Reducer = (state: GameReducerState, action: { type: string; payload?: any 
 
 type GameContextValue = GameReducerState & {
   setName: (n: string) => void;
-  startGame: (n?: string) => void;
+  startGame: (n?: string, cards?: number[]) => void;
   chooseCard: (value: number) => void;
   processGame: () => void;
   quitGame: () => void;
@@ -121,14 +121,14 @@ export const GameManager: React.FC<GameManagerProps> = ({ children }) => {
 
   const value = {
     ...state,
-    setName: (payload: string) => {
-      connection.emit('player:create', payload, (payload: GameReducerState['player']) => {
+    setName: (name: string) => {
+      connection.emit('player:create', name, (payload: GameReducerState['player']) => {
         localStorage.setItem('player', JSON.stringify(payload));
         dispatch({ type: 'set-player', payload });
       });
     },
-    startGame: (payload?: string) => {
-      connection.emit('game:start', payload, (game: Exclude<GameReducerState['game'], undefined>) => {
+    startGame: (game_id?: string, cards?: number[]) => {
+      connection.emit('game:start', game_id, cards, (game: Exclude<GameReducerState['game'], undefined>) => {
         dispatch({ type: 'set-game', payload: game });
         window.history.pushState(null, '', `/game/${game.id}`);
       });

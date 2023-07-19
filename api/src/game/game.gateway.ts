@@ -15,17 +15,17 @@ type PlayerSocket = { player: Player } & Socket;
 
 @WebSocketGateway()
 export class GameGateway {
-  constructor(private readonly GameService: GameService) {}
+  constructor(private readonly gameService: GameService) {}
 
   @WebSocketServer()
   server: Server;
 
   @Cron('* */10 * * * *')
   async handleCron() {
-    const keys = this.GameService.getAll();
+    const keys = this.gameService.getAll();
     for (const game_id of keys) {
       const sockets = await this.server.in(game_id).fetchSockets();
-      if (!sockets.length) this.GameService.deleteById(game_id);
+      if (!sockets.length) this.gameService.remove(game_id);
     }
   }
 
@@ -46,12 +46,14 @@ export class GameGateway {
   }
 
   @SubscribeMessage('game:start')
-  startGame(@ConnectedSocket() client: PlayerSocket, @MessageBody() id?: string) {
+  startGame(@ConnectedSocket() client: PlayerSocket, @MessageBody() [id, cards]: [string, number[]]) {
     try {
       let game: Game | undefined;
-      if (!id) game = this.GameService.create(client.player);
-      else {
-        game = this.GameService.getById(id);
+      if (!id) {
+        if (cards?.length > 16) throw new Error('Too many cards (maximum 16 allowed)');
+        game = this.gameService.create(client.player, cards);
+      } else {
+        game = this.gameService.get(id);
         if (Object.keys(game.players).length > 24) throw new Error('Too many players');
         game.players[client.player.id] = client.player;
         this.server.to(game.id).emit('game:new-player', client.player);
@@ -67,7 +69,7 @@ export class GameGateway {
   quitGame(@ConnectedSocket() client: PlayerSocket, @MessageBody() game_id: string) {
     try {
       const player_id = client.player.id;
-      const game = this.GameService.getById(game_id);
+      const game = this.gameService.get(game_id);
       delete game.players[player_id];
       this.server.to(game_id).emit('game:remove-player', player_id);
       client.leave(game_id);
@@ -80,7 +82,7 @@ export class GameGateway {
   chooseCard(@ConnectedSocket() client: PlayerSocket, @MessageBody() [game_id, value]: [string, number]) {
     try {
       const player_id = client.player.id;
-      const game = this.GameService.getById(game_id);
+      const game = this.gameService.get(game_id);
       if (game.players[player_id].card === value) delete game.players[player_id].card;
       else game.players[player_id].card = value;
       this.server.to(game_id).emit('game:card-chosen', {
@@ -96,7 +98,7 @@ export class GameGateway {
   @SubscribeMessage('game:process')
   processGame(@MessageBody() game_id: string) {
     try {
-      const game = this.GameService.getById(game_id);
+      const game = this.gameService.get(game_id);
       if (game.status === 'in-progress') {
         game.status = 'expiring';
         game.timer_id = setTimeout(() => {

@@ -14,11 +14,11 @@ const EstimationCards = () => {
   };
 
   return (
-    <div className="pb-12 pt-4 flex flex-row gap-3 justify-center" onClick={onClick}>
+    <div className="pb-12 pt-4 flex flex-row gap-4 justify-center" onClick={onClick}>
       {game.cards.map(card => (
         <Button
           key={card}
-          className="w-20 h-28 text-3xl border-2 tracking-tight"
+          className="w-16 h-24 text-2xl border-2 tracking-tight p-0"
           variant={game.players[player.id].card === card ? 'filled' : 'outline'}
           disabled={game.status === 'ended'}>
           {card}

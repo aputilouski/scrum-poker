@@ -1,14 +1,10 @@
 import React from 'react';
-import { TextInput, Button } from '@mantine/core';
-import { useForm } from '@mantine/form';
+import { Tabs } from '@mantine/core';
 import { useGame } from 'app/GameManager';
+import CreateGame from './CreateGame';
+import JoinGame from './JoinGame';
 
 const ChooseGame = () => {
-  const form = useForm({
-    initialValues: { id: '' },
-    validate: { id: n => (/^.{8,}$/.test(n) ? null : 'Invalid game id') },
-  });
-
   const { startGame } = useGame();
 
   React.useEffect(() => {
@@ -19,28 +15,19 @@ const ChooseGame = () => {
 
   return (
     <div className="mx-auto max-w-sm h-full flex items-center">
-      <div className="grow">
-        <form onSubmit={form.onSubmit(({ id }) => startGame(id))}>
-          <TextInput //
-            autoFocus
-            withAsterisk
-            label="Game id"
-            {...form.getInputProps('id')}
-          />
-          <Button className="block w-full mt-2" type="submit">
-            Join game
-          </Button>
-        </form>
+      <Tabs defaultValue="join" className="grow mb-44">
+        <Tabs.List position="center" className="mb-4">
+          <Tabs.Tab value="join">Join Game</Tabs.Tab>
+          <Tabs.Tab value="create">Create Game</Tabs.Tab>
+        </Tabs.List>
 
-        <div className="text-center mt-5">or</div>
-
-        <Button //
-          className="block w-full mt-5"
-          onClick={() => startGame()}
-          size="lg">
-          Create my game
-        </Button>
-      </div>
+        <Tabs.Panel value="join">
+          <JoinGame />
+        </Tabs.Panel>
+        <Tabs.Panel value="create">
+          <CreateGame />
+        </Tabs.Panel>
+      </Tabs>
     </div>
   );
 };

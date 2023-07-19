@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { WsException } from '@nestjs/websockets';
 import { nanoid } from 'nanoid';
 
 const games = new Map<string, Game>();
 
 @Injectable()
 export class GameService {
-  create(captain: Player): Game {
+  create(captain: Player, cards: number[]): Game {
+    if (!cards) throw new Error('No cards');
     const game: Game = {
       id: nanoid(),
       status: 'in-progress',
@@ -14,23 +14,23 @@ export class GameService {
       players: {
         [captain.id]: captain,
       },
-      cards: [0.5, 1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24],
+      cards,
     };
     games.set(game.id, game);
     return game;
   }
 
-  getById(id: string): Game | undefined {
+  get(id: string): Game | undefined {
     const game = games.get(id);
     if (!game) throw new Error('Game not found');
     return game;
   }
 
-  getAll() {
-    return games.keys();
+  remove(id: string) {
+    return games.delete(id);
   }
 
-  deleteById(id: string) {
-    return games.delete(id);
+  getAll() {
+    return games.keys();
   }
 }

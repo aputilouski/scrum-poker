@@ -22,7 +22,7 @@ const App = () => {
   };
 
   return (
-    <MantineProvider withNormalizeCSS theme={theme}>
+    <MantineProvider withNormalizeCSS withGlobalStyles theme={theme}>
       <Notifications />
       <Layout>
         <ConnectionProvider>
