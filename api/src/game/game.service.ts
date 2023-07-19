@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { WsException } from '@nestjs/websockets';
 import { nanoid } from 'nanoid';
 
-const games = new Map();
+const games = new Map<string, Game>();
 
 @Injectable()
 export class GameService {
@@ -12,9 +12,9 @@ export class GameService {
       status: 'in-progress',
       captain_id: captain.id,
       players: {
-        [captain.id]: captain.name,
+        [captain.id]: captain,
       },
-      cards: {},
+      cards: [0.5, 1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24],
     };
     games.set(game.id, game);
     return game;
@@ -22,7 +22,7 @@ export class GameService {
 
   getById(id: string): Game | undefined {
     const game = games.get(id);
-    if (!game) throw new WsException('Game not found');
+    if (!game) throw new Error('Game not found');
     return game;
   }
 
@@ -32,35 +32,5 @@ export class GameService {
 
   deleteById(id: string) {
     return games.delete(id);
-  }
-
-  chooseCard(game_id: string, player_id: string, value: number): number | undefined {
-    const game: Game = games.get(game_id);
-    if (!game) throw new WsException('Game not found');
-    if (game.cards[player_id] === value) delete game.cards[player_id];
-    else game.cards[player_id] = value;
-    return game.cards[player_id];
-  }
-
-  changeStatus(game: Game, status: Game['status']) {
-    game.status = status;
-  }
-
-  dropCards(game: Game) {
-    game.cards = {};
-  }
-
-  addPlayer(game_id: string, player: Player) {
-    const game: Game = games.get(game_id);
-    if (!game) throw new WsException('Game not found');
-    if (Object.keys(game.players).length > 24) throw new WsException('Too many players');
-    game.players[player.id] = player.name;
-  }
-
-  removePlayer(game_id: string, player_id: string) {
-    const game: Game = games.get(game_id);
-    if (!game) throw new WsException('Game not found');
-    delete game.players[player_id];
-    delete game.cards[player_id];
   }
 }

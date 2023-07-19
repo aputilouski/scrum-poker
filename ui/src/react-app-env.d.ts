@@ -7,9 +7,7 @@ type Game = {
   status: 'in-progress' | 'expiring' | 'ended';
   captain_id: string;
   players: {
-    [k: string]: string;
+    [k: string]: Player & { card?: number };
   };
-  cards: {
-    [k: string]: number;
-  };
+  cards: number[];
 };

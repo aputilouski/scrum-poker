@@ -27,30 +27,35 @@ const Reducer = (state: GameReducerState, action: { type: string; payload?: any 
     case 'quit-game':
       return { ...state, game: undefined, step: 1, result: undefined };
     case 'choose-card': {
+      if (!state.game) return state;
       const { player_id, value } = payload as { player_id: string; value: number };
       const game = { ...state.game };
-      game.cards = { ...game.cards };
-      if (value) game.cards[player_id] = value;
-      else delete game.cards[player_id];
+      game.players = { ...game.players };
+      if (value) game.players[player_id].card = value;
+      else delete game.players[player_id].card;
       return { ...state, game };
     }
-    case 'new-player': {
-      const { id, name } = payload as Player;
+    case 'add-player': {
+      if (!state.game) return state;
+      const { id } = payload as Player;
       const game = { ...state.game };
-      game.players = { ...game.players, [id]: name };
+      game.players = { ...game.players, [id]: payload };
       return { ...state, game };
     }
     case 'remove-player': {
+      if (!state.game) return state;
       const game = { ...state.game };
       game.players = { ...game.players };
-      game.cards = { ...game.cards };
       delete game.players[payload];
-      delete game.cards[payload];
       return { ...state, game };
     }
     case 'game-status': {
-      const game = { ...state.game, status: payload };
-      if (game.status === 'in-progress') game.cards = {};
+      if (!state.game) return state;
+      const game = { ...state.game, status: payload as Game['status'] };
+      if (game.status === 'in-progress')
+        Object.values(game.players).forEach(p => {
+          delete p.card;
+        });
       return { ...state, game, result: undefined };
     }
     case 'set-result': {
@@ -89,7 +94,7 @@ export const GameManager: React.FC<GameManagerProps> = ({ children }) => {
     const value = localStorage.getItem('player');
     if (!connection || !value) return;
     // dispatch({ type: 'set-loading', payload: true });
-    connection?.emit('player:init', JSON.parse(value), (payload: GameReducerState['player']) => {
+    connection?.emit('player:connect', JSON.parse(value), (payload: GameReducerState['player']) => {
       dispatch({ type: 'set-player', payload });
       // dispatch({ type: 'set-loading', payload: false });
     });
@@ -100,8 +105,8 @@ export const GameManager: React.FC<GameManagerProps> = ({ children }) => {
     connection.on('game:card-chosen', (payload: { game_id: string; player_id: string; value?: number }) => {
       dispatch({ type: 'choose-card', payload });
     });
-    connection.on('game:new-player', (payload: Player) => dispatch({ type: 'new-player', payload }));
-    connection.on('game:status-change', (payload: string, gameResult: GameReducerState['result']) => {
+    connection.on('game:new-player', (payload: Player) => dispatch({ type: 'add-player', payload }));
+    connection.on('game:update-status', (payload: string, gameResult: GameReducerState['result']) => {
       dispatch({ type: 'game-status', payload });
       if (gameResult) dispatch({ type: 'set-result', payload: gameResult });
     });

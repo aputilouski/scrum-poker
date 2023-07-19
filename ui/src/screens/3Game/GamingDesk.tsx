@@ -19,19 +19,22 @@ const positionClassNames = {
 
 const PlayersBar: React.FC<PlayersBarProps> = ({ position, className, players: keys, game }) => (
   <div className={clsx('flex justify-center', positionClassNames[position], className)}>
-    {keys.map(key => (
-      <div key={key} className="flex flex-col items-center gap-3 w-12">
-        {game.status !== 'ended' || !game.cards[key] ? (
-          <div className={clsx('w-9 h-14 rounded transition', game.cards[key] ? 'bg-blue-500' : 'bg-gray-200')} />
-        ) : (
-          <div className="border-2 border-blue-500 border-solid w-9 h-14 flex justify-center items-center rounded">
-            <span className="font-bold text-blue-500 text-lg">{game.cards[key]}</span>
-          </div>
-        )}
+    {keys.map(key => {
+      const card = game.players[key].card;
+      return (
+        <div key={key} className="flex flex-col items-center gap-3 w-12">
+          {game.status !== 'ended' || !card ? (
+            <div className={clsx('w-9 h-14 rounded transition', card ? 'bg-blue-500' : 'bg-gray-200')} />
+          ) : (
+            <div className="border-2 border-blue-500 border-solid w-9 h-14 flex justify-center items-center rounded">
+              <span className="font-bold text-blue-500 text-lg">{card}</span>
+            </div>
+          )}
 
-        <div className="font-bold leading-none">{game.players[key]}</div>
-      </div>
-    ))}
+          <div className="font-bold leading-none">{game.players[key].name}</div>
+        </div>
+      );
+    })}
   </div>
 );
 
@@ -58,8 +61,8 @@ const GamingDesk = () => {
     if (!game?.status) return;
     if (game.status === 'in-progress') setTiming(3);
     else if (game.status === 'expiring') {
-      const timer1 = setTimeout(() => setTiming(t => t - 1), 600);
-      const timer2 = setTimeout(() => setTiming(t => t - 1), 1200);
+      const timer1 = setTimeout(() => setTiming(t => t - 1), 800);
+      const timer2 = setTimeout(() => setTiming(t => t - 1), 1600);
       return () => {
         clearTimeout(timer1);
         clearTimeout(timer2);
