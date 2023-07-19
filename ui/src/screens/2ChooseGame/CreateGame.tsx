@@ -34,7 +34,7 @@ const CreateGame = () => {
       votingSystem: 'fibonacci',
       values: '1,2,3,5,8,13',
     },
-    validate: { values: n => (/^\d+(\.\d+)? (\s*,\s*\d+(\.\d+)?)*$/.test(n) ? null : 'Invalid string') },
+    validate: { values: n => (/^\d+(\.\d+)?(\s*,\s*\d+(\.\d+)?)*$/.test(n) ? null : 'Invalid string') },
   });
 
   const { setFieldValue } = form;

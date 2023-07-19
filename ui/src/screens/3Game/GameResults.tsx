@@ -6,7 +6,7 @@ const GameResults = () => {
   if (game?.status !== 'ended' || !result) return null;
 
   return (
-    <div className="h-28 flex flex-row justify-center gap-10 items-center pt-4 pb-12">
+    <div className="flex flex-row justify-center gap-10 items-center pt-3 pb-16">
       <div className="flex flex-row gap-4">
         {Object.keys(result.stats).map(key => (
           <div key={key}>
